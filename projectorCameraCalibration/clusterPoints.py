@@ -42,7 +42,7 @@ def ValidateCluster(maxDist, cluster):
     return True
 
 if __name__ == '__main__':
-    img = cv2.imread('C:\\Users\\fcend\\Documents\\checkerboardPattern.png')
+    img = cv2.imread('C:\\Users\\fcend\\git\\bbb\\projectorCameraCalibration\\checkerboardPattern.png')
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     edges = cv2.Canny(gray, 50, 150, apertureSize=3)
 
