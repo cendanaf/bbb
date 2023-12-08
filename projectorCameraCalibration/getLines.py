@@ -1,8 +1,9 @@
 import cv2
 import numpy as np
 import collections
+    
 
-def SegmentByAngleKmeans(lines, k=2, **kwargs):
+def SegmentAngleByKmeans(lines, k=2, **kwargs):
     """
     Groups lines based on angle with k-means.
 
@@ -14,8 +15,8 @@ def SegmentByAngleKmeans(lines, k=2, **kwargs):
 
     # Define criteria = (type, max_iter, epsilon)
     default_criteria_type = cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER
-    criteria = kwargs.get('criteria', (default_criteria_type, 10, 1.0))
-    flags = kwargs.get('flags', cv2.KMEANS_RANDOM_CENTERS)
+    criteria = kwargs.get('criteria', (default_criteria_type, 10, 0.5))
+    flags = kwargs.get('flags', cv2.KMEANS_PP_CENTERS)
     attempts = kwargs.get('attempts', 10)
 
     # returns angles in [0, pi] in radians
@@ -25,7 +26,8 @@ def SegmentByAngleKmeans(lines, k=2, **kwargs):
                     for angle in angles], dtype=np.float32)
 
     # run kmeans on the coords
-    labels, centers = cv2.kmeans(pts, k, None, criteria, attempts, flags)[1:]
+    compactness, labels, centers = cv2.kmeans(pts, k, None, criteria,
+                                              attempts, flags)
     labels = labels.reshape(-1)  # transpose to row vec
 
     # segment lines based on their kmeans label
@@ -35,7 +37,22 @@ def SegmentByAngleKmeans(lines, k=2, **kwargs):
     segmented = list(segmented.values())
     return segmented
 
-def Intersection(line1, line2):
+def DrawLines(img, lines, color):
+    for line in lines:
+        rho, theta = line[0]
+        a = np.cos(theta)
+        b = np.sin(theta)
+        x0 = a * rho
+        y0 = b * rho
+        x1 = int(x0 + 1000*(-b))
+        y1 = int(y0 + 1000*(a))
+        x2 = int(x0 - 1000*(-b))
+        y2 = int(y0 - 1000*(a))
+
+        cv2.line(img, (x1, y1), (x2, y2), color, 2)
+    return img
+
+def LineIntersection(line1, line2):
     """
     Finds the intersection of two lines given in Hesse normal form.
 
@@ -62,30 +79,60 @@ def SegmentedIntersections(lines):
         for nextGroup in lines[i+1:]:
             for line1 in group:
                 for line2 in nextGroup:
-                    intersections.append(Intersection(line1, line2)) 
+                    intersections.append(LineIntersection(line1, line2)) 
 
     return intersections
+
+
 
 
 
 if __name__ == '__main__':
     
     img = cv2.imread('C:\\Users\\fcend\\git\\bbb\\projectorCameraCalibration\\checkerboardPattern.png')
-    #kernel = np.ones((5, 5), np.float32) / 25    
-    #smoothed = cv2.filter2D(img, -1, kernel)
+    
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     edges = cv2.Canny(gray, 50, 150, apertureSize=3)
 
-    minLineLength = 100
-    maxLineGap = 10
+    minLineLength = 200
+    maxLineGap = 1
     rho = 1
     theta = np.pi/180
-    threshold = 100
+    threshold = 107
 
-    lines = cv2.HoughLines(edges, rho, np.pi/180, threshold)
-    segmented = SegmentByAngleKmeans(lines) #got vertical and horizontal segmented[0, 1]
+    lines = cv2.HoughLines(edges, rho, np.pi/180,
+                           threshold, np.array([]), 0, 0)
+    segmented = SegmentAngleByKmeans(lines)
+    horizontals = segmented[0]
+    verticals = segmented[1]
 
-    for line in segmented[0]:
+    img = DrawLines(img, horizontals, (0, 255, 255))
+    img = DrawLines(img, verticals, (255, 255, 0))
+
+    intersections = SegmentedIntersections(segmented)
+    for intersection in intersections:
+        cv2.circle(img, (intersection[0], intersection[1]),
+                   radius=2, color=(255, 0, 0), thickness=-1)
+        
+    
+    """
+    # Failed
+    a = 15
+    b = 8
+
+    ret, corners = cv2.findChessboardCorners(morph, (a,b), None)
+    print(ret)
+    """
+    """
+    
+    
+
+    
+
+    verticals = segmented[0]
+    horizontals = segmented[1]
+    
+    for line in verticals:
         rho, theta = line[0]
         a = np.cos(theta)
         b = np.sin(theta)
@@ -98,7 +145,7 @@ if __name__ == '__main__':
 
         cv2.line(img, (x1, y1), (x2, y2), (255, 255, 0), 2)
 
-    for line in segmented[1]:
+    for line in horizontals:
         rho, theta = line[0]
         a = np.cos(theta)
         b = np.sin(theta)
@@ -110,9 +157,11 @@ if __name__ == '__main__':
         y2 = int(y0 - 1000*(a))
 
         cv2.line(img, (x1, y1), (x2, y2), (0, 255, 255), 2)
-        
+    
+    
     intersections = SegmentedIntersections(segmented)
     for intersection in intersections:
-        cv2.circle(img, (intersection[0], intersection[1]), radius=2, color=(0, 0, 255), thickness=-1)
-
+        cv2.circle(img, (intersection[0], intersection[1]), radius=2, color=(255, 0, 0), thickness=-1)
+    
+    """
     cv2.imshow('Frame', img)
