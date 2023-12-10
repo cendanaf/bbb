@@ -3,6 +3,21 @@ import numpy as np
 import collections
 import getLines
 
+cap = cv2.VideoCapture(0)
+if not cap.isOpened():
+    print("Can not open camera")
+    exit()
+
+Brightness = cap.get(cv2.CAP_PROP_BRIGHTNESS)
+Contrast = cap.get(cv2.CAP_PROP_CONTRAST)
+Saturation = cap.get(cv2.CAP_PROP_SATURATION)
+Gain = cap.get(cv2.CAP_PROP_GAIN)
+Hue = cap.get(cv2.CAP_PROP_HUE)
+Exposure = cap.get(cv2.CAP_PROP_EXPOSURE)
+print('[Brightness, Contrast, Saturation, Gain, Hue] =\
+      [{}, {}, {}, {}, {}, {}]'.format(
+            Brightness, Contrast, Saturation, Gain, Hue, Exposure))
+
 def ProcessImage(image):
     """
     Processes image
@@ -98,6 +113,82 @@ def GetFourCornerPoints(points):
     
 
 if __name__ == '__main__':
+    while True:
+        # Check if settings have changed
+        if( cap.get(cv2.CAP_PROP_BRIGHTNESS) != Brightness or
+            cap.get(cv2.CAP_PROP_CONTRAST) != Contrast or
+            cap.get(cv2.CAP_PROP_SATURATION) != Saturation or
+            cap.get(cv2.CAP_PROP_GAIN) != Gain or
+            cap.get(cv2.CAP_PROP_HUE) != Hue or
+            cap.get(cv2.CAP_PROP_EXPOSURE) != Exposure):
+            
+            Brightness = cap.get(cv2.CAP_PROP_BRIGHTNESS)
+            Contrast = cap.get(cv2.CAP_PROP_CONTRAST)
+            Saturation = cap.get(cv2.CAP_PROP_SATURATION)
+            Gain = cap.get(cv2.CAP_PROP_GAIN)
+            Hue = cap.get(cv2.CAP_PROP_HUE)
+            Exposure = cap.get(cv2.CAP_PROP_EXPOSURE)
+            print('[Brightness, Contrast, Saturation, Gain, Hue, Exposure] = \
+                  [{}, {}, {}, {}, {}]'.format(Brightness, Contrast, \
+                    Saturation, Gain, Hue, Exposure))
+        
+        ret, frame = cap.read()
+        if not ret:
+            print("Can not receive frame (frame end?). Exiting...")
+            break
+
+        cv2.imshow('Frame', frame)
+        key = cv2.waitKey(1)
+        if key == ord('q'):
+            break
+        elif key == ord('t'):
+            filename = 'checkerboardPattern.png'
+            cv2.imwrite(filename, frame)
+            print("Image saved to: {}".format(filename))
+        elif key == ord('b'):
+            if(Brightness >= 255):
+                b = 0
+            else:
+                b = Brightness + 1
+            cap.set(cv2.CAP_PROP_BRIGHTNESS, b)
+        elif key == ord('c'):
+            if(Contrast >= 255):
+               c = 10
+            else:
+                c = Contrast + 1
+            cap.set(cv2.CAP_PROP_CONTRAST, c)
+        elif key == ord('s'):
+            if(Saturation >= 255):
+               s = 0
+            else:
+                s = Saturation + 1
+            cap.set(cv2.CAP_PROP_SATURATION, s)
+        elif key == ord('g'):
+            if(Gain >= 255):
+               g = 0
+            else:
+                g = Saturation + 1
+            cap.set(cv2.CAP_PROP_GAIN, g)
+        elif key == ord('h'):
+            if(Hue >= 255):
+               h = 0
+            else:
+                h = Hue + 1
+            cap.set(cv2.CAP_PROP_HUE, h)
+        elif key == ord('e'):
+            if(Exposure >= 255):
+               e = 0
+            else:
+                e = Exposure + 1
+            cap.set(cv2.CAP_PROP_EXPOSURE, e)
+
+    cap.release()
+    cv2.destroyAllWindows()
+    
+
+
+
+    """
     img = cv2.imread('C:\\Users\\fcend\\git\\bbb\\projectorCameraCalibration\\checkerboardPattern.png')
 
     rows, cols = HarrisCorners(img)
@@ -129,3 +220,4 @@ if __name__ == '__main__':
     #    cv2.circle(img, corner, radius=2, color=(0,255,0), thickness=-1)
     
     cv2.imshow('Frame', img)
+    """

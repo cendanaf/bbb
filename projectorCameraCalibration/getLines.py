@@ -162,7 +162,7 @@ if __name__ == '__main__':
             cap.set(cv2.CAP_PROP_BRIGHTNESS, b)
         elif key == ord('c'):
             if(Contrast >= 255):
-               c = 0
+               c = 10
             else:
                 c = Contrast + 1
             cap.set(cv2.CAP_PROP_CONTRAST, c)
