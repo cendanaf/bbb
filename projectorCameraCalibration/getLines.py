@@ -13,8 +13,9 @@ Saturation = cap.get(cv2.CAP_PROP_SATURATION)
 Gain = cap.get(cv2.CAP_PROP_GAIN)
 Hue = cap.get(cv2.CAP_PROP_HUE)
 Exposure = cap.get(cv2.CAP_PROP_EXPOSURE)
-print('[Brightness, Contrast, Saturation, Gain, Hue] = [{}, {}, {}, {}, {}]'.format(
-            Brightness, Contrast, Saturation, Gain, Hue))
+print('[Brightness, Contrast, Saturation, Gain, Hue] =\
+      [{}, {}, {}, {}, {}, {}]'.format(
+            Brightness, Contrast, Saturation, Gain, Hue, Exposure))
 
 
 def SegmentAngleByKmeans(lines, k=2, **kwargs):
@@ -118,8 +119,9 @@ if __name__ == '__main__':
             Gain = cap.get(cv2.CAP_PROP_GAIN)
             Hue = cap.get(cv2.CAP_PROP_HUE)
             Exposure = cap.get(cv2.CAP_PROP_EXPOSURE)
-            print('[Brightness, Contrast, Saturation, Gain, Hue] = [{}, {}, {}, {}, {}]'.format(
-                Brightness, Contrast, Saturation, Gain, Hue))
+            print('[Brightness, Contrast, Saturation, Gain, Hue, Exposure] = \
+                  [{}, {}, {}, {}, {}]'.format(Brightness, Contrast, \
+                    Saturation, Gain, Hue, Exposure))
 
         
         ret, frame = cap.read()
