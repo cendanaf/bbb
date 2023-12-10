@@ -23,7 +23,7 @@ def ProcessImage(image):
     Processes image
     (so I don't have to keep doing it for every corner detection algorithm)
     """
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     equalized = cv2.equalizeHist(gray)
     thresh = cv2.threshold(gray,70,255,cv2.THRESH_BINARY)[1]
 
@@ -133,6 +133,15 @@ if __name__ == '__main__':
                     Saturation, Gain, Hue, Exposure))
         
         ret, frame = cap.read()
+
+        rows, cols = HarrisCorners(frame)
+        frame[rows, cols] = [255, 255, 0]
+        p = np.array( list(zip(rows, cols)) )
+
+
+
+
+        
         if not ret:
             print("Can not receive frame (frame end?). Exiting...")
             break
